@@ -7,7 +7,6 @@ import { useUserStore } from "@/lib/store/user";
 import PageHeader from "@/components/layout/PageHeader";
 import GlowCard from "@/components/ui/GlowCard";
 import Button from "@/components/ui/Button";
-import SessionLogger from "@/components/workout/SessionLogger";
 import ProgressHistory from "@/components/workout/ProgressHistory";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
@@ -36,10 +35,6 @@ export default function WorkoutTrackingPage() {
   const userId = useUserStore((s) => s.email);
   
   const [date] = useState<string>(today());
-  const [activeWorkout, setActiveWorkout] = useState<{
-    id: string;
-    plan_id: string;
-  } | null>(null);
   const [availablePlans, setAvailablePlans] = useState<any[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -65,7 +60,8 @@ export default function WorkoutTrackingPage() {
         }
 
         if (data) {
-          setActiveWorkout({ id: data.id, plan_id: data.plan_id });
+          // Redirect to session page if there's an active workout
+          router.push(`/workouts/session?workoutId=${data.id}&planId=${data.plan_id}`);
         }
       } catch (err) {
         console.error("Error checking active session:", err);
@@ -75,11 +71,11 @@ export default function WorkoutTrackingPage() {
     }
 
     checkActiveSession();
-  }, [userId, supabase]);
+  }, [userId, supabase, router]);
 
   // Fetch available workout plans
   useEffect(() => {
-    if (!userId || activeWorkout) return;
+    if (!userId) return;
 
     async function fetchPlans() {
       try {
@@ -102,7 +98,7 @@ export default function WorkoutTrackingPage() {
     }
 
     fetchPlans();
-  }, [userId, activeWorkout, supabase]);
+  }, [userId, supabase]);
 
   // Start a new workout session
   const handleStartWorkout = async () => {
@@ -128,7 +124,8 @@ export default function WorkoutTrackingPage() {
       }
 
       const session = await response.json();
-      setActiveWorkout({ id: session.id, plan_id: selectedPlanId });
+      // Redirect to session page with workout details
+      router.push(`/workouts/session?workoutId=${session.id}&planId=${selectedPlanId}`);
     } catch (err) {
       console.error("Error starting workout:", err);
       setError(err instanceof Error ? err.message : "Failed to start workout");
@@ -139,8 +136,7 @@ export default function WorkoutTrackingPage() {
 
   // Handle workout completion
   const handleComplete = () => {
-    setActiveWorkout(null);
-    setSelectedPlanId("");
+    router.push("/workouts");
   };
 
   if (!userId) {
@@ -179,29 +175,18 @@ export default function WorkoutTrackingPage() {
       <PageHeader title="WORKOUT TRACKING" subtitle={formatDate(date)} />
 
       <div className="flex flex-col gap-4 px-4 py-4">
-        {/* Active Workout Session */}
-        {activeWorkout ? (
-          <ScrollReveal direction="up" delay={0}>
-            <SessionLogger
-              workoutId={activeWorkout.id}
-              planId={activeWorkout.plan_id}
-              userId={userId}
-              onComplete={handleComplete}
-            />
-          </ScrollReveal>
-        ) : (
-          /* Start Workout Section */
-          <ScrollReveal direction="up" delay={0}>
-            <GlowCard glowColor="37,99,235">
-              <div className="p-6 flex flex-col gap-4">
-                <div>
-                  <h3 className="font-heading text-[.875rem] text-[var(--color-text-1)] tracking-wide mb-2">
-                    START WORKOUT
-                  </h3>
-                  <p className="font-body text-[13px] text-[var(--color-text-2)]">
-                    Choose a workout plan to begin tracking your session
-                  </p>
-                </div>
+        {/* Start Workout Section */}
+        <ScrollReveal direction="up" delay={0}>
+          <GlowCard glowColor="37,99,235">
+            <div className="p-6 flex flex-col gap-4">
+              <div>
+                <h3 className="font-heading text-[.875rem] text-[var(--color-text-1)] tracking-wide mb-2">
+                  START WORKOUT
+                </h3>
+                <p className="font-body text-[13px] text-[var(--color-text-2)]">
+                  Choose a workout plan to begin tracking your session
+                </p>
+              </div>
 
                 {error && (
                   <div className="text-[13px] font-body text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-[10px] px-4 py-3">
@@ -251,21 +236,18 @@ export default function WorkoutTrackingPage() {
               </div>
             </GlowCard>
           </ScrollReveal>
-        )}
 
-        {/* Workout History - only show when not in active session */}
-        {!activeWorkout && (
-          <ScrollReveal direction="up" delay={0.1}>
-            <GlowCard>
-              <div className="p-6">
-                <h3 className="font-heading text-[.875rem] text-[var(--color-text-1)] tracking-wide mb-4">
-                  WORKOUT HISTORY
-                </h3>
-                <ProgressHistory userId={userId} />
-              </div>
-            </GlowCard>
-          </ScrollReveal>
-        )}
+        {/* Workout History */}
+        <ScrollReveal direction="up" delay={0.1}>
+          <GlowCard>
+            <div className="p-6">
+              <h3 className="font-heading text-[.875rem] text-[var(--color-text-1)] tracking-wide mb-4">
+                WORKOUT HISTORY
+              </h3>
+              <ProgressHistory userId={userId} />
+            </div>
+          </GlowCard>
+        </ScrollReveal>
       </div>
     </div>
   );
