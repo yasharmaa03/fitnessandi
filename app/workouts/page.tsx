@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import PageHeader from "@/components/layout/PageHeader";
 import GlowCard from "@/components/ui/GlowCard";
+import Button from "@/components/ui/Button";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import WeeklyWorkoutPlanner from "@/components/workout/WeeklyWorkoutPlanner";
 
@@ -47,7 +49,41 @@ export default function WorkoutsPage() {
 
       {/* ── Content ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 px-4 py-4">
+        {/* Workout Tracking Link */}
         <ScrollReveal direction="up" delay={0}>
+          <Link href="/workouts/tracking">
+            <GlowCard glowColor="34,197,94" className="cursor-pointer hover:scale-[1.02] transition-transform">
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-heading text-[.875rem] text-[var(--color-text-1)] tracking-wide mb-1">
+                    TRACK WORKOUT SESSION
+                  </p>
+                  <p className="font-body text-[12px] text-[var(--color-text-2)]">
+                    Log sets, track progress, view history
+                  </p>
+                </div>
+                <svg 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none"
+                  className="text-[var(--color-text-3)]"
+                >
+                  <path 
+                    d="M9 18l6-6-6-6" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </GlowCard>
+          </Link>
+        </ScrollReveal>
+
+        {/* Weekly Workout Planner */}
+        <ScrollReveal direction="up" delay={0.1}>
           <GlowCard glowColor="37,99,235">
             <div className="p-4">
               <p className="font-heading text-[.875rem] text-[var(--color-text-1)] tracking-wide mb-3">
