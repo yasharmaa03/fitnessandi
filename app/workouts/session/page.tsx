@@ -2,12 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useUserStore } from "@/lib/store/user";
 import SessionLogger from "@/components/workout/SessionLogger";
 import Link from "next/link";
 
-export default function SessionPage() {
+// Create QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5_000, // 5 seconds for active workout sessions
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Inner component (must be inside QueryClientProvider)
+function SessionPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -95,5 +107,14 @@ export default function SessionPage() {
         onComplete={handleComplete}
       />
     </div>
+  );
+}
+
+// Outer component with QueryClientProvider
+export default function SessionPage() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SessionPageContent />
+    </QueryClientProvider>
   );
 }

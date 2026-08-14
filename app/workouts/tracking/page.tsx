@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useUserStore } from "@/lib/store/user";
 import PageHeader from "@/components/layout/PageHeader";
@@ -9,6 +10,16 @@ import GlowCard from "@/components/ui/GlowCard";
 import Button from "@/components/ui/Button";
 import ProgressHistory from "@/components/workout/ProgressHistory";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+
+// Create QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000, // 30 seconds
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 /** Today's date as YYYY-MM-DD */
 function today(): string {
@@ -29,7 +40,8 @@ function formatDate(iso: string): string {
   });
 }
 
-export default function WorkoutTrackingPage() {
+// Inner component (must be inside QueryClientProvider)
+function WorkoutTrackingContent() {
   const router = useRouter();
   const supabase = createClient();
   const userId = useUserStore((s) => s.email);
@@ -250,5 +262,14 @@ export default function WorkoutTrackingPage() {
         </ScrollReveal>
       </div>
     </div>
+  );
+}
+
+// Outer component with QueryClientProvider
+export default function WorkoutTrackingPage() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <WorkoutTrackingContent />
+    </QueryClientProvider>
   );
 }
