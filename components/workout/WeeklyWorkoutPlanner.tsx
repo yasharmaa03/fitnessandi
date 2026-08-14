@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 
 // ---------------------------------------------------------------------------
@@ -291,6 +292,7 @@ function LoadingSkeleton() {
 // ---------------------------------------------------------------------------
 
 export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerProps) {
+  const router = useRouter();
   const [savedPlan, setSavedPlan] = useState<WeeklyPlan | null>(null);
   const [previewPlan, setPreviewPlan] = useState<PreviewDay[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -581,16 +583,26 @@ export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerPro
 
                         {/* Actions for Saved Plans */}
                         {!previewPlan && dayData && (
-                          <div className="flex gap-2 pt-2">
+                          <div className="flex flex-col gap-2 pt-2">
                             {!isRest && adherenceStatus !== 'completed' && (
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => handleMarkComplete(dayData.id)}
-                                fullWidth
-                              >
-                                Mark Complete
-                              </Button>
+                              <>
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  onClick={() => router.push(`/workouts/session?planId=${dayData.id}`)}
+                                  fullWidth
+                                >
+                                  Start Workout
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleMarkComplete(dayData.id)}
+                                  fullWidth
+                                >
+                                  Mark Complete
+                                </Button>
+                              </>
                             )}
                             <Button
                               variant="ghost"
