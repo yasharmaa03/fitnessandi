@@ -51,16 +51,6 @@ const NAV = [
     ),
   },
   {
-    label: "Andi",
-    href: "/andi",
-    icon: (active: boolean) => (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <circle cx="11" cy="11" r="4" stroke={active ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1.75"/>
-        <circle cx="11" cy="11" r="8" stroke={active ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1" strokeDasharray="2.5 2.5"/>
-      </svg>
-    ),
-  },
-  {
     label: "Me",
     href: "/profile",
     icon: (active: boolean) => (

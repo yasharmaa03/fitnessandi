@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 
 // ---------------------------------------------------------------------------
@@ -292,7 +291,6 @@ function LoadingSkeleton() {
 // ---------------------------------------------------------------------------
 
 export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerProps) {
-  const router = useRouter();
   const [savedPlan, setSavedPlan] = useState<WeeklyPlan | null>(null);
   const [previewPlan, setPreviewPlan] = useState<PreviewDay[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -440,7 +438,7 @@ export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerPro
       {/* No Plan State */}
       {!savedPlan && !previewPlan && (
         <div className="flex flex-col items-center gap-4 py-8">
-          <span className="text-[48px]">📅</span>
+
           <p className="font-body text-[15px] text-[var(--color-text-2)] text-center max-w-md">
             Generate a personalized 7-day workout plan based on your goals and preferences
           </p>
@@ -467,7 +465,7 @@ export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerPro
             {splitInfo && (
               <div className="px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                 <h3 className="font-body font-bold text-[15px] text-[var(--color-text-1)]">
-                  📅 Weekly Split: {splitInfo.splitName}
+                  Weekly Split: {splitInfo.splitName}
                 </h3>
               </div>
             )}
@@ -510,7 +508,7 @@ export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerPro
                           </span>
                         )}
                         {adherenceStatus === 'completed' && (
-                          <span className="text-[16px]" title="Completed">✅</span>
+                          <span className="font-caption text-[10px] font-semibold text-[#22C55E] bg-[#F0FDF4] border border-[#BBF7D0] px-2 py-0.5 rounded-full">Done</span>
                         )}
                       </div>
                       <svg
@@ -560,7 +558,6 @@ export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerPro
                         {/* Rest Day Message */}
                         {isRest && (
                           <div className="text-center py-4">
-                            <span className="text-[24px] mb-2 block">🛌</span>
                             <p className="font-body text-[13px] text-[var(--color-text-2)]">
                               Rest & Recovery
                             </p>
@@ -589,7 +586,7 @@ export default function WeeklyWorkoutPlanner({ userId }: WeeklyWorkoutPlannerPro
                                 <Button
                                   variant="primary"
                                   size="sm"
-                                  onClick={() => router.push(`/workouts/session?planId=${dayData.id}`)}
+                                  onClick={() => handleMarkComplete(dayData.id)}
                                   fullWidth
                                 >
                                   Start Workout

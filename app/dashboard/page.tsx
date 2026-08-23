@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 <p className="font-heading text-[1.0625rem] text-white tracking-wide mb-1">UPPER BODY STRENGTH</p>
                 <p className="font-caption text-[10px] font-light text-white/50 mb-auto">45 min · Intermediate · Chest & Shoulders</p>
                 <ClickSpark color="#60A5FA" className="mt-3">
-                  <Link href="/workouts/session"
+                  <Link href="/workouts"
                     className="h-10 w-full rounded-[10px] bg-[#2563EB] text-white font-body font-bold text-[12px] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,.4)] hover:bg-[#1D4ED8] transition-colors">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="white"/></svg>
                     Start Workout

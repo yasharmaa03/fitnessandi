@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Barbell Bench Press",
+    "category": "chest",
+    "equipment": "barbell",
+    "instructions": [
+      "Lie flat on a bench with your feet on the ground",
+      "Grip the barbell slightly wider than shoulder width",
+      "Lower the bar to your chest with control",
+      "Press the bar back up to the starting position"
+    ],
+    "images": ["https://example.com/bench-press.jpg"]
+  },
+  {
+    "name": "Barbell Squat",
+    "category": "legs",
+    "equipment": "barbell",
+    "instructions": [
+      "Stand with feet shoulder-width apart",
+      "Place the barbell on your upper back",
+      "Lower your hips back and down",
+      "Drive through your heels to return to standing"
+    ]
+  },
+  {
+    "name": "Pull-up",
+    "category": "back",
+    "equipment": "body weight",
+    "instructions": [
+      "Hang from a pull-up bar with palms facing away",
+      "Pull yourself up until your chin is above the bar",
+      "Lower yourself back down with control"
+    ]
+  },
+  {
+    "name": "BARBELL BENCH PRESS",
+    "category": "Chest",
+    "equipment": "Barbell",
+    "instructions": ["Duplicate exercise to test deduplication"]
+  },
+  {
+    "name": "Invalid Exercise"
+  },
+  {
+    "name": "Dumbbell Curl",
+    "category": "biceps",
+    "equipment": "dumbbell",
+    "instructions": [
+      "Stand with dumbbells at your sides",
+      "Curl the weights up to shoulder level",
+      "Lower back down with control"
+    ]
+  },
+  {
+    "name": "Plank",
+    "category": "unknown-category",
+    "instructions": [
+      "Get into a push-up position",
+      "Hold your body in a straight line"
+    ]
+  },
+  {
+    "name": "Deadlift",
+    "category": "back",
+    "equipment": "barbell",
+    "instructions": [
+      "Stand with feet hip-width apart",
+      "Grip the barbell with hands just outside your legs",
+      "Lift the bar by extending your hips and knees",
+      "Lower the bar back to the ground with control"
+    ],
+    "images": ["https://example.com/deadlift.jpg"]
+  }
+]

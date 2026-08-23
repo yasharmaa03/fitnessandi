@@ -20,9 +20,12 @@ if [ ! -d "ml/venv" ]; then
 fi
 
 # Start ML Workout Service
-echo "🏋️  Starting ML Workout Recommendation Service (port 8001)..."
+echo "Starting ML Workout Recommendation Service (port 8001)..."
 cd ml
 source venv/bin/activate
+# Export Supabase credentials so workout_server.py can query the DB
+export SUPABASE_URL=$(grep '^SUPABASE_URL=' ../.env.local | cut -d '=' -f2-)
+export SUPABASE_SERVICE_KEY=$(grep '^SUPABASE_SERVICE_KEY=' ../.env.local | cut -d '=' -f2-)
 uvicorn workout_server:app --host 0.0.0.0 --port 8001 --reload &
 ML_WORKOUT_PID=$!
 cd ..

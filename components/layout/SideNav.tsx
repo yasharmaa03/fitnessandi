@@ -47,28 +47,6 @@ const NAV = [
       </svg>
     ),
   },
-  {
-    label: "Andi AI",
-    href: "/andi",
-    icon: (a: boolean) => (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle cx="10" cy="10" r="4" stroke={a ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1.75"/>
-        <circle cx="10" cy="10" r="7.5" stroke={a ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1" strokeDasharray="2.5 2.5"/>
-      </svg>
-    ),
-  },
-  {
-    label: "Community",
-    href: "/community",
-    icon: (a: boolean) => (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle cx="7" cy="7" r="3" stroke={a ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1.75"/>
-        <circle cx="14" cy="6" r="2.5" stroke={a ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1.75"/>
-        <path d="M1 17c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke={a ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1.75" strokeLinecap="round"/>
-        <path d="M17 17c0-2.2-1.3-4.1-3.2-5" stroke={a ? "var(--color-primary)" : "var(--color-text-3)"} strokeWidth="1.75" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
 ];
 
 export default function SideNav() {
