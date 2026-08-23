@@ -62,3 +62,4 @@ lib/meal-recommender/meal_ranker.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+DEPLOYMENT_CHECKLIST.md
