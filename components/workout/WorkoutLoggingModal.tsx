@@ -572,6 +572,8 @@ export default function WorkoutLoggingModal({
       node.style.setProperty('overflow-y', 'scroll', 'important');
       node.style.setProperty('overflow-x', 'hidden', 'important');
       node.style.setProperty('-webkit-overflow-scrolling', 'touch');
+      // Reset scroll position to top
+      node.scrollTop = 0;
     }
   }, []);
 
@@ -682,40 +684,22 @@ export default function WorkoutLoggingModal({
             {/* Scrollable content */}
             <div 
               ref={scrollContainerRef}
-              className="flex-1 px-5 pb-6 force-scroll" 
+              className="flex-1 px-5 pb-6 pt-2 force-scroll" 
               style={{ 
                 minHeight: 0,
                 overscrollBehavior: "contain"
               }}
             >
-              <AnimatePresence mode="wait">
-                {step === "search" ? (
-                  <motion.div
-                    key="search"
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -16 }}
-                    transition={{ duration: 0.18 }}
-                  >
-                    <ExerciseSearch onSelect={handleSelectExercise} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="sets"
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 16 }}
-                    transition={{ duration: 0.18 }}
-                  >
-                    <SetLogger
-                      exercise={selectedExercise!}
-                      onBack={() => setStep("search")}
-                      onLog={handleLog}
-                      isSaving={isSaving}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {step === "search" ? (
+                <ExerciseSearch onSelect={handleSelectExercise} />
+              ) : (
+                <SetLogger
+                  exercise={selectedExercise!}
+                  onBack={() => setStep("search")}
+                  onLog={handleLog}
+                  isSaving={isSaving}
+                />
+              )}
             </div>
           </motion.div>
         </div>
