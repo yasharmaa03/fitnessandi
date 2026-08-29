@@ -566,6 +566,15 @@ export default function WorkoutLoggingModal({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      // Force scroll styles directly on the DOM element
+      node.style.setProperty('overflow-y', 'scroll', 'important');
+      node.style.setProperty('overflow-x', 'hidden', 'important');
+      node.style.setProperty('-webkit-overflow-scrolling', 'touch');
+    }
+  }, []);
+
   // Reset on close
   useEffect(() => {
     if (!isOpen) {
@@ -671,7 +680,11 @@ export default function WorkoutLoggingModal({
             )}
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-5 pb-6" style={{ minHeight: 0 }}>
+            <div 
+              ref={scrollContainerRef}
+              className="flex-1 px-5 pb-6" 
+              style={{ minHeight: 0 }}
+            >
               <AnimatePresence mode="wait">
                 {step === "search" ? (
                   <motion.div
