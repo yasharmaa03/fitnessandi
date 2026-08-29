@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useUserStore } from "@/lib/store/user";
+import { createClient } from "@/lib/supabase/client";
 
 const stagger = {
   hidden: {},
@@ -51,7 +51,6 @@ function Field({
 
 export default function SignupPage() {
   const router = useRouter();
-  const login = useUserStore((s) => s.login);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName]   = useState("");
   const [email, setEmail]         = useState("");
@@ -68,10 +67,46 @@ export default function SignupPage() {
     if (!email.includes("@")) return setError("Enter a valid email address.");
     if (password.length < 8)  return setError("Password must be at least 8 characters.");
     if (password !== confirm)  return setError("Passwords do not match.");
+    
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
-    login(firstName.trim(), lastName.trim(), email.trim());
-    router.push("/onboarding");
+    
+    try {
+      const supabase = createClient();
+      
+      // Sign up with Supabase
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+        options: {
+          data: {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            full_name: `${firstName.trim()} ${lastName.trim()}`,
+          },
+        },
+      });
+
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        console.log('Signup successful:', data.user?.email);
+        // Redirect to onboarding
+        router.push("/onboarding");
+        router.refresh();
+      } else if (data.user && !data.session) {
+        // Email confirmation required
+        setError("Please check your email to confirm your account.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (

@@ -3,14 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useUserStore } from "@/lib/store/user";
+import { createClient } from "@/lib/supabase/client";
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const fadeUp  = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
 export default function LoginPage() {
   const router = useRouter();
-  const setUser = useUserStore((s) => s.setUser);
   const [email, setEmail]     = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow]       = useState(false);
@@ -21,11 +20,35 @@ export default function LoginPage() {
     setError("");
     if (!email.includes("@")) return setError("Enter a valid email address.");
     if (!password)             return setError("Enter your password.");
+    
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
-    // Only set email + isLoggedIn — preserve name/avatar already set during signup
-    setUser({ email: email.trim(), isLoggedIn: true });
-    router.push("/dashboard");
+    
+    try {
+      const supabase = createClient();
+      
+      // Sign in with Supabase
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        console.log('Login successful:', data.user?.email);
+        // Redirect to dashboard
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
