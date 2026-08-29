@@ -2,6 +2,34 @@ import { createServerClient } from '@/lib/supabase/server';
 import { computeBmi, getBmiCategory, computeTargets } from '@/lib/nutrition/targets';
 import type { ActivityLevel, Goal, CuisineType } from '@/lib/types/nutrition-profile';
 
+// GET: Fetch user profile
+export async function GET(request: Request): Promise<Response> {
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get('userId');
+
+  if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+    return new Response('userId is required', { status: 400 });
+  }
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('nutrition_profiles')
+    .select('*')
+    .eq('user_id', userId.trim())
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No profile found
+      return new Response('Profile not found', { status: 404 });
+    }
+    console.error('Profile fetch error:', error);
+    return new Response('Failed to fetch profile', { status: 500 });
+  }
+
+  return Response.json(data, { status: 200 });
+}
+
 // POST: Save or update full nutrition profile
 export async function POST(request: Request): Promise<Response> {
   let body: Record<string, unknown>;
