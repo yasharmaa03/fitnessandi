@@ -11,8 +11,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const logout = useUserStore((s) => s.logout);
 
   // Function to load user profile from Supabase
-  const loadUserProfile = async (userEmail: string) => {
+  const loadUserProfile = async (userEmail: string, authMetadata?: any) => {
     try {
+      // Get first/last name from auth metadata (set during signup)
+      const firstName = authMetadata?.first_name || '';
+      const lastName = authMetadata?.last_name || '';
+      
       // Fetch nutrition profile using EMAIL as userId (your app's convention)
       const response = await fetch(`/api/nutrition/profile?userId=${encodeURIComponent(userEmail)}`);
       
@@ -27,11 +31,19 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           'gain': 'Build Muscle',
         };
         
+        // Capitalize gender properly
+        const genderDisplay = profile.gender 
+          ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1).toLowerCase()
+          : 'Male';
+        
         setUser({
+          firstName: firstName,
+          lastName: lastName,
+          name: firstName && lastName ? `${firstName} ${lastName}` : '',
           email: userEmail,
           isLoggedIn: true,
           age: profile.age || 0,
-          gender: profile.gender || 'Male',
+          gender: genderDisplay,
           heightCm: profile.height_cm || 0,
           weightKg: profile.weight_kg || 0,
           activityLevel: profile.activity_level || 'moderately_active',
@@ -42,8 +54,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         // Compute BMI
         useUserStore.getState().computeBmi();
       } else {
-        console.log('No profile found, setting basic user info');
+        console.log('No profile found, setting basic user info with name from auth');
         setUser({
+          firstName: firstName,
+          lastName: lastName,
+          name: firstName && lastName ? `${firstName} ${lastName}` : '',
           email: userEmail,
           isLoggedIn: true,
         });
@@ -51,6 +66,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     } catch (error) {
       console.error('Error loading user profile:', error);
       setUser({
+        firstName: firstName,
+        lastName: lastName,
+        name: firstName && lastName ? `${firstName} ${lastName}` : '',
         email: userEmail,
         isLoggedIn: true,
       });
@@ -70,8 +88,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in:', session.user.email);
         
-        // Load user profile data from Supabase using EMAIL
-        await loadUserProfile(session.user.email!);
+        // Load user profile data from Supabase using EMAIL and auth metadata
+        await loadUserProfile(session.user.email!, session.user.user_metadata);
         
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
@@ -91,8 +109,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         console.log('Existing session found:', session.user.email);
-        // Load profile for existing session using EMAIL
-        await loadUserProfile(session.user.email!);
+        // Load profile for existing session using EMAIL and auth metadata
+        await loadUserProfile(session.user.email!, session.user.user_metadata);
       } else {
         console.log('No existing session');
       }
