@@ -11,10 +11,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const logout = useUserStore((s) => s.logout);
 
   // Function to load user profile from Supabase
-  const loadUserProfile = async (userId: string, userEmail: string) => {
+  const loadUserProfile = async (userEmail: string) => {
     try {
-      // Fetch nutrition profile
-      const response = await fetch(`/api/nutrition/profile?userId=${encodeURIComponent(userId)}`);
+      // Fetch nutrition profile using EMAIL as userId (your app's convention)
+      const response = await fetch(`/api/nutrition/profile?userId=${encodeURIComponent(userEmail)}`);
       
       if (response.ok) {
         const profile = await response.json();
@@ -70,8 +70,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in:', session.user.email);
         
-        // Load user profile data from Supabase
-        await loadUserProfile(session.user.id, session.user.email!);
+        // Load user profile data from Supabase using EMAIL
+        await loadUserProfile(session.user.email!);
         
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
@@ -91,8 +91,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         console.log('Existing session found:', session.user.email);
-        // Load profile for existing session
-        await loadUserProfile(session.user.id, session.user.email!);
+        // Load profile for existing session using EMAIL
+        await loadUserProfile(session.user.email!);
       } else {
         console.log('No existing session');
       }
