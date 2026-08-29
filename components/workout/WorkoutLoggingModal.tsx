@@ -653,7 +653,7 @@ export default function WorkoutLoggingModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-            className="relative z-10 h-[88vh] sm:max-h-[90vh] w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[20px] bg-[var(--color-surface-1)] flex flex-col"
+            className="relative z-10 h-[88vh] sm:max-h-[90vh] w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[20px] bg-[var(--color-surface-1)] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -682,8 +682,11 @@ export default function WorkoutLoggingModal({
             {/* Scrollable content */}
             <div 
               ref={scrollContainerRef}
-              className="flex-1 px-5 pb-6" 
-              style={{ minHeight: 0 }}
+              className="flex-1 px-5 pb-6 force-scroll" 
+              style={{ 
+                minHeight: 0,
+                overscrollBehavior: "contain"
+              }}
             >
               <AnimatePresence mode="wait">
                 {step === "search" ? (
