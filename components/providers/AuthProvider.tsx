@@ -12,11 +12,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   // Function to load user profile from Supabase
   const loadUserProfile = async (userEmail: string, authMetadata?: any) => {
+    // Get first/last name from auth metadata (set during signup)
+    const firstName = authMetadata?.first_name || '';
+    const lastName = authMetadata?.last_name || '';
+    
     try {
-      // Get first/last name from auth metadata (set during signup)
-      const firstName = authMetadata?.first_name || '';
-      const lastName = authMetadata?.last_name || '';
-      
       // Fetch nutrition profile using EMAIL as userId (your app's convention)
       const response = await fetch(`/api/nutrition/profile?userId=${encodeURIComponent(userEmail)}`);
       
