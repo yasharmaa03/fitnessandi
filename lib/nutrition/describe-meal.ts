@@ -55,7 +55,7 @@ Use standard nutritional values. If quantities are unclear, assume typical servi
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'mixtral-8x7b-32768',
+      model: 'openai/gpt-oss-120b',
       temperature: 0.3,
       max_tokens: 1024,
       messages: [
