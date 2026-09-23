@@ -48,7 +48,7 @@ export async function POST(request: Request): Promise<Response> {
   const from = message.from;
   const text = message.text.body;
 
-  console.log('[WhatsApp Webhook] Received message:', { from, text });
+  console.log('[WhatsApp Webhook] Received message:', { from, text, timestamp: new Date().toISOString() });
 
   try {
     const userId = await resolveUserIdFromPhone(from);
