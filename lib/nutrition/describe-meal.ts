@@ -58,7 +58,12 @@ Use standard nutritional values. If quantities are unclear, assume typical servi
       model: 'llama-3.1-70b-versatile',
       temperature: 0.3,
       max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
     }),
     signal: AbortSignal.timeout(15000),
   });
@@ -66,7 +71,7 @@ Use standard nutritional values. If quantities are unclear, assume typical servi
   if (!response.ok) {
     const errorText = await response.text();
     console.error('[Groq API] Error response:', response.status, errorText);
-    throw new Error(`Description analysis failed: ${response.status}`);
+    throw new Error(`Description analysis failed: ${response.status} - ${errorText}`);
   }
 
   const data = (await response.json()) as {
