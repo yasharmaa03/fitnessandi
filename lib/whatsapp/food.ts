@@ -34,7 +34,8 @@ export async function handleFoodMessage(userId: string, text: string): Promise<s
     estimate = await estimateMacrosFromDescription(text);
   } catch (error) {
     console.error('[WhatsApp Food] Failed to estimate macros:', error);
-    return `Sorry, I couldn't estimate the nutrition for that. Try describing it differently (e.g. "2 idlis and sambar"). ${DISCLAIMER}`;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return `Sorry, I couldn't estimate the nutrition for that. Error: ${errorMessage}\n\nTry describing it differently (e.g. "2 idlis and sambar"). ${DISCLAIMER}`;
   }
 
   try {
