@@ -48,13 +48,21 @@ export async function POST(request: Request): Promise<Response> {
   const from = message.from;
   const text = message.text.body;
 
+  console.log('[WhatsApp Webhook] Received message:', { from, text });
+
   try {
     const userId = await resolveUserIdFromPhone(from);
+    console.log('[WhatsApp Webhook] Resolved user ID:', userId);
+    
     await logWhatsAppMessage({ user_id: userId, phone_number: from, direction: 'incoming', message_text: text });
+    
     const reply = await routeIncomingMessage(text, userId);
+    console.log('[WhatsApp Webhook] Generated reply:', reply);
+    
     await sendWhatsAppMessage(from, reply, userId);
+    console.log('[WhatsApp Webhook] Message sent successfully');
   } catch (err) {
-    console.error('Failed to process incoming WhatsApp message', err);
+    console.error('[WhatsApp Webhook] Failed to process incoming message:', err);
     await sendWhatsAppMessage(from, 'Sorry, something went wrong on our end. Please try again shortly.');
   }
 

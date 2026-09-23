@@ -32,7 +32,8 @@ export async function handleFoodMessage(userId: string, text: string): Promise<s
   let estimate;
   try {
     estimate = await estimateMacrosFromDescription(text);
-  } catch {
+  } catch (error) {
+    console.error('[WhatsApp Food] Failed to estimate macros:', error);
     return `Sorry, I couldn't estimate the nutrition for that. Try describing it differently (e.g. "2 idlis and sambar"). ${DISCLAIMER}`;
   }
 
@@ -49,7 +50,8 @@ export async function handleFoodMessage(userId: string, text: string): Promise<s
       fat_g: estimate.fat_g,
       fiber_g: estimate.fiber_g,
     });
-  } catch {
+  } catch (error) {
+    console.error('[WhatsApp Food] Failed to insert meal log:', error);
     return `Sorry, I couldn't save that log right now. Please try again shortly. ${DISCLAIMER}`;
   }
 

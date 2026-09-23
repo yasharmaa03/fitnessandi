@@ -64,7 +64,9 @@ Use standard nutritional values. If quantities are unclear, assume typical servi
   });
 
   if (!response.ok) {
-    throw new Error('Description analysis failed');
+    const errorText = await response.text();
+    console.error('[Groq API] Error response:', response.status, errorText);
+    throw new Error(`Description analysis failed: ${response.status}`);
   }
 
   const data = (await response.json()) as {
@@ -77,12 +79,14 @@ Use standard nutritional values. If quantities are unclear, assume typical servi
   let parsed: unknown;
   try {
     parsed = JSON.parse(sanitized);
-  } catch {
-    throw new Error('Description analysis failed');
+  } catch (parseError) {
+    console.error('[Groq API] Failed to parse JSON:', sanitized);
+    throw new Error('Description analysis failed - invalid JSON response');
   }
 
   if (!isValidDescriptionResult(parsed)) {
-    throw new Error('Description analysis failed');
+    console.error('[Groq API] Invalid result structure:', parsed);
+    throw new Error('Description analysis failed - invalid response structure');
   }
 
   return parsed;
