@@ -31,6 +31,13 @@ class MealRanker:
     def _load_model(self):
         """Load LightGBM model and feature schema"""
         try:
+            # Debug logging
+            logger.info(f"Model directory: {_MODEL_DIR}")
+            logger.info(f"Model path: {_MODEL_PATH}")
+            logger.info(f"Schema path: {_SCHEMA_PATH}")
+            logger.info(f"Model exists: {_MODEL_PATH.exists()}")
+            logger.info(f"Schema exists: {_SCHEMA_PATH.exists()}")
+            
             # Load feature schema
             if not _SCHEMA_PATH.exists():
                 raise FileNotFoundError(f"Feature schema not found: {_SCHEMA_PATH}")
