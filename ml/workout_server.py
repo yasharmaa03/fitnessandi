@@ -13,14 +13,17 @@ Endpoint: POST /workout/recommend  { user_id, date }
 import logging
 import os
 import math
+import traceback
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+
+from ml.meal_recommender.rank_meals import get_ranker
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -575,3 +578,81 @@ async def recommend_workout(request: WorkoutRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Meal Ranking Endpoint
+# ══════════════════════════════════════════════════════════════════════════
+
+@app.post("/rank-meals")
+async def rank_meals(request: Request):
+    """
+    Rank meal candidates using LightGBM model.
+    
+    Request body:
+        {
+            "candidates": [
+                {
+                    "meal_id": "unique_id",
+                    "meal_name": "Chicken Curry",
+                    "features": [f1, f2, f3, f4, f5, f6, f7],
+                    ... (other meal fields)
+                },
+                ...
+            ]
+        }
+    
+    Response:
+        {
+            "ranked": [
+                {
+                    "meal_id": "unique_id",
+                    "meal_name": "Chicken Curry",
+                    "score": 0.85,
+                    "features": [...],
+                    ... (other meal fields)
+                },
+                ...
+            ]
+        }
+    
+    Returns meals sorted by score (descending)
+    """
+    try:
+        # Get meal ranker
+        meal_ranker = get_ranker()
+
+        # Parse request body
+        body = await request.json()
+        candidates = body.get("candidates", [])
+
+        if not candidates:
+            return JSONResponse(
+                status_code=422,
+                content={"detail": "No candidates provided"}
+            )
+
+        logger.info(f"Ranking {len(candidates)} meal candidates")
+
+        # Rank meals
+        ranked = meal_ranker.rank_meals(candidates)
+
+        logger.info(f"Ranked {len(ranked)} meals successfully")
+
+        return JSONResponse(
+            status_code=200,
+            content={"ranked": ranked}
+        )
+
+    except ValueError as e:
+        logger.error(f"Invalid request: {e}")
+        return JSONResponse(
+            status_code=422,
+            content={"detail": str(e)}
+        )
+    except Exception as e:
+        logger.error(f"Ranking error: {e}\n{traceback.format_exc()}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"}
+        )
