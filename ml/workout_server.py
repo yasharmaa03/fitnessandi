@@ -23,8 +23,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from ml.meal_recommender.rank_meals import get_ranker
-
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -584,6 +582,23 @@ if __name__ == "__main__":
 # Meal Ranking Endpoint
 # ══════════════════════════════════════════════════════════════════════════
 
+# Global ranker instance (lazy-loaded)
+_meal_ranker = None
+
+def get_meal_ranker():
+    """Lazy-load meal ranker to avoid crashing server on startup if model fails"""
+    global _meal_ranker
+    if _meal_ranker is None:
+        try:
+            from ml.meal_recommender.rank_meals import get_ranker
+            _meal_ranker = get_ranker()
+            logger.info("Meal ranker loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load meal ranker: {e}")
+            _meal_ranker = False  # Mark as failed
+    return _meal_ranker if _meal_ranker is not False else None
+
+
 @app.post("/rank-meals")
 async def rank_meals(request: Request):
     """
@@ -619,8 +634,14 @@ async def rank_meals(request: Request):
     Returns meals sorted by score (descending)
     """
     try:
-        # Get meal ranker
-        meal_ranker = get_ranker()
+        # Lazy-load meal ranker
+        meal_ranker = get_meal_ranker()
+        
+        if meal_ranker is None:
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "Meal ranker not available"}
+            )
 
         # Parse request body
         body = await request.json()
