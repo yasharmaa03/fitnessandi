@@ -590,7 +590,7 @@ def get_meal_ranker():
     global _meal_ranker
     if _meal_ranker is None:
         try:
-            from ml.meal_recommender.rank_meals import get_ranker
+            from meal_recommender.rank_meals import get_ranker
             _meal_ranker = get_ranker()
             logger.info("Meal ranker loaded successfully")
         except Exception as e:
