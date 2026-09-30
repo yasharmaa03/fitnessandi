@@ -24,10 +24,35 @@ interface WhatsAppWebhookPayload {
           from?: string;
           text?: { body?: string };
           type?: string;
+          id?: string; // Message ID to prevent duplicates
         }>;
       };
     }>;
   }>;
+}
+
+// Cache to prevent processing duplicate messages
+const processedMessages = new Map<string, number>();
+const MESSAGE_CACHE_TTL = 60000; // 1 minute
+
+function isMessageProcessed(messageId: string): boolean {
+  const now = Date.now();
+  
+  // Clean up old entries
+  for (const [id, timestamp] of processedMessages.entries()) {
+    if (now - timestamp > MESSAGE_CACHE_TTL) {
+      processedMessages.delete(id);
+    }
+  }
+  
+  // Check if already processed
+  if (processedMessages.has(messageId)) {
+    return true;
+  }
+  
+  // Mark as processed
+  processedMessages.set(messageId, now);
+  return false;
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -47,8 +72,15 @@ export async function POST(request: Request): Promise<Response> {
 
   const from = message.from;
   const text = message.text.body;
+  const messageId = message.id;
 
-  console.log('[WhatsApp Webhook] Received message:', { from, text, timestamp: new Date().toISOString() });
+  // Prevent duplicate processing
+  if (messageId && isMessageProcessed(messageId)) {
+    console.log('[WhatsApp Webhook] Skipping duplicate message:', messageId);
+    return new Response('OK', { status: 200 });
+  }
+
+  console.log('[WhatsApp Webhook] Received message:', { from, text, messageId, timestamp: new Date().toISOString() });
 
   try {
     const userId = await resolveUserIdFromPhone(from);
