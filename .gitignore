@@ -54,7 +54,8 @@ env/
 # LightGBM meal recommender data and models
 lib/meal-recommender/data/
 lib/meal-recommender/venv/
-lib/meal-recommender/meal_ranker.txt
+# Note: meal_ranker.txt is now included in git for deployment
+# lib/meal-recommender/meal_ranker.txt
 
 # vercel
 .vercel
