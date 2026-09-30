@@ -888,19 +888,31 @@ export async function rankAndSelectTop5(
     let scores: number[];
     let usedFallback = false;
     
-    // Attempt model inference, fall back to heuristic on error
+    // Attempt ML ranking via Railway, fall back to heuristic on error
     try {
-      if (modelState.useFallback || !isModelReady()) {
-        throw new Error('Model not ready, using fallback');
-      }
+      console.log('[Ranking] Calling Railway ML service for ranking');
       
-      console.log('[Ranking] Running model inference');
-      scores = predictScores(featureVectors);
-      console.log('[Ranking] Model inference successful');
+      // Import Railway client
+      const { rankMealsWithML } = await import('@/lib/meal-recommender/railway-client');
+      
+      // Prepare candidates for Railway API
+      const candidates = validMeals.map((meal, index) => ({
+        meal_id: meal.id,
+        meal_name: meal.name,
+        features: featureVectors[index]
+      }));
+      
+      // Call Railway ranking service
+      const rankedResults = await rankMealsWithML(candidates);
+      
+      // Extract scores (already sorted by Railway, but we need scores array)
+      scores = rankedResults.map(r => r.score);
+      
+      console.log('[Ranking] Railway ML ranking successful');
     } catch (error) {
-      // Model inference failed, use fallback heuristic
+      // Railway failed, use fallback heuristic
       console.warn(
-        '[Ranking] Model inference failed, falling back to heuristic ranking:',
+        '[Ranking] Railway ML service failed, falling back to heuristic ranking:',
         error instanceof Error ? error.message : error
       );
       usedFallback = true;

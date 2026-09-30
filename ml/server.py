@@ -26,6 +26,7 @@ from PIL import Image
 from torchvision import transforms
 
 from ml.train import build_model
+from ml.meal_recommender.rank_meals import get_ranker
 
 # ---------------------------------------------------------------------------
 # Paths — resolved relative to this file so the server works regardless of
@@ -84,6 +85,16 @@ async def lifespan(app: FastAPI):
             exc,
         )
         sys.exit(1)
+
+    # --- Load meal ranker (LightGBM) --------------------------------------
+    try:
+        meal_ranker = get_ranker()
+        logger.info("Loaded meal ranker successfully")
+        app.state.meal_ranker = meal_ranker
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to load meal ranker: %s", exc)
+        # Don't exit - meal ranking is optional, food classifier is primary
+        app.state.meal_ranker = None
 
     # --- Publish to app.state so request handlers can access them ----------
     app.state.model = model
@@ -245,4 +256,82 @@ async def analyze(request: Request, file: UploadFile = File(...)):
         return JSONResponse(
             status_code=500,
             content={"detail": "Internal server error"},
+        )
+
+
+# ---------------------------------------------------------------------------
+# POST /rank-meals
+# ---------------------------------------------------------------------------
+@app.post("/rank-meals")
+async def rank_meals(request: Request):
+    """
+    Rank meal candidates using LightGBM model.
+    
+    Request body:
+        {
+            "candidates": [
+                {
+                    "meal_id": "unique_id",
+                    "meal_name": "Chicken Curry",
+                    "features": [f1, f2, f3, f4, f5, f6, f7],
+                    ... (other meal fields)
+                },
+                ...
+            ]
+        }
+    
+    Response:
+        {
+            "ranked": [
+                {
+                    "meal_id": "unique_id",
+                    "meal_name": "Chicken Curry",
+                    "score": 0.85,
+                    "features": [...],
+                    ... (other meal fields)
+                },
+                ...
+            ]
+        }
+    
+    Returns meals sorted by score (descending)
+    """
+    try:
+        # Check if ranker is loaded
+        meal_ranker = request.app.state.meal_ranker
+        if meal_ranker is None:
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "Meal ranker not available"}
+            )
+
+        # Parse request body
+        body = await request.json()
+        candidates = body.get("candidates", [])
+
+        if not candidates:
+            return JSONResponse(
+                status_code=422,
+                content={"detail": "No candidates provided"}
+            )
+
+        # Rank meals
+        ranked = meal_ranker.rank_meals(candidates)
+
+        return JSONResponse(
+            status_code=200,
+            content={"ranked": ranked}
+        )
+
+    except ValueError as e:
+        logger.error(f"Invalid request: {e}")
+        return JSONResponse(
+            status_code=422,
+            content={"detail": str(e)}
+        )
+    except Exception as e:
+        logger.error(f"Ranking error: {e}\n{traceback.format_exc()}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"}
         )

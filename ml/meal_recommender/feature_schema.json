@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "feature_count": 7,
+  "features": [
+    {
+      "name": "macro_delta_calories",
+      "type": "float",
+      "min": 0,
+      "max": 2000
+    },
+    {
+      "name": "macro_delta_protein",
+      "type": "float",
+      "min": 0,
+      "max": 200
+    },
+    {
+      "name": "macro_delta_carbs",
+      "type": "float",
+      "min": 0,
+      "max": 300
+    },
+    {
+      "name": "macro_delta_fat",
+      "type": "float",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "name": "cuisine_match",
+      "type": "int",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "meal_slot_match",
+      "type": "int",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "days_since_last_eaten",
+      "type": "int",
+      "min": 0,
+      "max": 999
+    }
+  ]
+}
