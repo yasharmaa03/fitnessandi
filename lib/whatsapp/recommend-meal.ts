@@ -29,14 +29,14 @@ export async function handleMealRecommendation(userId: string, mealType?: string
 
     // Show top 3 suggestions
     suggestions.slice(0, 3).forEach((meal, index) => {
-      message += `${index + 1}. *${meal.name}*\n`;
+      message += `${index + 1}. *${meal.meal_name}*\n`;
       message += `   ${meal.description}\n`;
       message += `   📊 ${Math.round(meal.calories)} kcal | ${Math.round(meal.protein_g)}g protein\n`;
       
-      if (meal.ingredients && meal.ingredients.length > 0) {
-        message += `   🥘 ${meal.ingredients.slice(0, 3).join(', ')}`;
-        if (meal.ingredients.length > 3) {
-          message += `, +${meal.ingredients.length - 3} more`;
+      if (meal.items && meal.items.length > 0) {
+        message += `   🥘 ${meal.items.slice(0, 3).join(', ')}`;
+        if (meal.items.length > 3) {
+          message += `, +${meal.items.length - 3} more`;
         }
         message += `\n`;
       }
@@ -49,7 +49,7 @@ export async function handleMealRecommendation(userId: string, mealType?: string
 
     // Add regenerate and meal type options
     message += `💡 *Try these commands:*\n`;
-    message += `• Log it: "breakfast ${suggestions[0].name}"\n`;
+    message += `• Log it: "breakfast ${suggestions[0].meal_name}"\n`;
     message += `• Regenerate: "recommend meal" or "new meal"\n`;
     message += `• Specific meal: "recommend breakfast/lunch/dinner"\n`;
 
