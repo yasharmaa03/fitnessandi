@@ -158,6 +158,18 @@ export function logRecommendation(
       // Create Supabase client
       const supabase = createServerClient();
       
+      // Check if user_id is a valid UUID format
+      // If it's an email (like from nutrition_profiles), skip logging
+      // This table expects UUID from auth.users, not email strings
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(userId)) {
+        console.log(
+          `[Recommendation Logger] Skipping log for non-UUID user_id: ${userId} ` +
+          `(table expects UUID, got email/string)`
+        );
+        return;
+      }
+      
       // Insert event record
       const { error } = await supabase
         .from('meal_recommendation_events')
@@ -253,6 +265,15 @@ export function updateOutcome(
       
       // Create Supabase client
       const supabase = createServerClient();
+      
+      // Check if user_id is a valid UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(userId)) {
+        console.log(
+          `[Recommendation Logger] Skipping outcome update for non-UUID user_id: ${userId}`
+        );
+        return;
+      }
       
       // Find the most recent recommendation event for this user
       const { data: recentEvent, error: fetchError } = await supabase
