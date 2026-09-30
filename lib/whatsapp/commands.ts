@@ -26,7 +26,9 @@ const HELP_MESSAGE =
   '📊 *TRACKING:*\n' +
   '• "summary" - Today\'s nutrition & workout stats\n\n' +
   '💡 *RECOMMENDATIONS:*\n' +
-  '• "recommend meal" - Get meal suggestions\n' +
+  '• "recommend meal" - AI-powered meal suggestions\n' +
+  '• "recommend breakfast/lunch/dinner" - Specific meal\n' +
+  '• "new meal" - Regenerate different suggestions\n' +
   '• "recommend workout" - Get today\'s workout plan\n\n' +
   DISCLAIMER;
 
@@ -62,9 +64,23 @@ export async function routeIncomingMessage(text: string, userId: string | null):
     return handleWorkoutRecommendation(userId);
   }
 
-  // Meal recommendation
-  if (normalized === 'recommend meal' || normalized === 'meal plan' || normalized === 'meal recommendation') {
+  // Meal recommendation - with meal type support
+  if (normalized === 'recommend meal' || normalized === 'meal plan' || normalized === 'meal recommendation' || normalized === 'new meal') {
     return handleMealRecommendation(userId);
+  }
+
+  // Specific meal type recommendations
+  if (normalized === 'recommend breakfast' || normalized === 'breakfast plan') {
+    return handleMealRecommendation(userId, 'breakfast');
+  }
+  if (normalized === 'recommend lunch' || normalized === 'lunch plan') {
+    return handleMealRecommendation(userId, 'lunch');
+  }
+  if (normalized === 'recommend dinner' || normalized === 'dinner plan') {
+    return handleMealRecommendation(userId, 'dinner');
+  }
+  if (normalized === 'recommend snack' || normalized === 'snack plan') {
+    return handleMealRecommendation(userId, 'snack');
   }
 
   // Water logging
