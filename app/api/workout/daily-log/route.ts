@@ -58,6 +58,7 @@ export async function GET(request: Request) {
       reps,
       rpe,
       logged_at,
+      duration_minutes,
       exercises (
         name,
         muscle_group,
@@ -78,7 +79,15 @@ export async function GET(request: Request) {
     exercise_name: string;
     muscle_group: string;
     equipment: string;
-    sets: Array<{ id: string; set_number: number; weight_kg: number; reps: number; rpe: number | null; logged_at: string }>;
+    sets: Array<{ 
+      id: string; 
+      set_number: number; 
+      weight_kg: number | null; 
+      reps: number | null; 
+      rpe: number | null; 
+      logged_at: string;
+      duration_minutes: number | null;
+    }>;
   }>();
 
   for (const set of (sets ?? [])) {
@@ -99,10 +108,11 @@ export async function GET(request: Request) {
     exerciseMap.get(exId)!.sets.push({
       id: s.id as string,
       set_number: s.set_number as number,
-      weight_kg: s.weight_kg as number,
-      reps: s.reps as number,
+      weight_kg: s.weight_kg as number | null,
+      reps: s.reps as number | null,
       rpe: s.rpe as number | null,
       logged_at: s.logged_at as string,
+      duration_minutes: s.duration_minutes as number | null,
     });
   }
 
