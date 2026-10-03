@@ -8,10 +8,11 @@ import Button from "@/components/ui/Button";
 interface SetRow {
   id: string;
   set_number: number;
-  weight_kg: number;
-  reps: number;
+  weight_kg: number | null;
+  reps: number | null;
   rpe: number | null;
   logged_at: string;
+  duration_minutes: number | null;
 }
 
 interface ExerciseEntry {
