@@ -15,29 +15,40 @@ export async function handleWorkoutRecommendation(userId: string): Promise<strin
 
     const data = await response.json();
     
-    if (!data.exercises || data.exercises.length === 0) {
-      return `No workout plan available for today. Make sure your profile is set up in the app!`;
+    // Handle rest day
+    if (data.workout_type === 'Rest' || !data.recommended_exercises || data.recommended_exercises.length === 0) {
+      return `🛌 *Rest Day*\n\nToday is a recovery day! Your body needs rest to grow stronger.\n\n💡 Consider:\n• Light stretching\n• Foam rolling\n• Walking\n• Active recovery\n\nYour next workout will be ready tomorrow! 💪`;
     }
 
     // Build workout message
-    let message = `💪 *Today's Workout Plan*\n`;
-    message += `${data.muscle_group || 'Full Body'} Day\n\n`;
+    let message = `💪 *${data.workout_type} Day*\n\n`;
 
-    data.exercises.slice(0, 5).forEach((exercise: any, index: number) => {
+    data.recommended_exercises.slice(0, 5).forEach((exercise: any, index: number) => {
       message += `${index + 1}. *${exercise.exercise_name}*\n`;
-      message += `   ${exercise.target_sets} sets × ${exercise.target_reps_min}-${exercise.target_reps_max} reps`;
+      message += `   ${exercise.target_sets} sets × ${exercise.target_reps} reps`;
       
-      if (exercise.recommended_weight_kg && exercise.recommended_weight_kg > 0) {
-        message += ` @ ${Math.round(exercise.recommended_weight_kg)}kg`;
+      if (exercise.suggested_weight_kg && exercise.suggested_weight_kg > 0) {
+        message += ` @ ${Math.round(exercise.suggested_weight_kg)}kg`;
       }
-      message += `\n\n`;
+      message += `\n`;
+      
+      // Add rationale if available (first exercise only for brevity)
+      if (index === 0 && exercise.rationale) {
+        message += `   💡 ${exercise.rationale}\n`;
+      }
+      message += `\n`;
     });
 
-    if (data.exercises.length > 5) {
-      message += `_+ ${data.exercises.length - 5} more exercises_\n\n`;
+    if (data.recommended_exercises.length > 5) {
+      message += `_+ ${data.recommended_exercises.length - 5} more exercises_\n\n`;
     }
 
-    message += `Open the app to see full details and start tracking! 📱`;
+    // Add workout summary
+    if (data.plan_metadata?.estimated_duration_minutes) {
+      message += `⏱️ Estimated time: ~${data.plan_metadata.estimated_duration_minutes} min\n`;
+    }
+
+    message += `\nStart logging: "bench press 3x10 60kg" 🏋️`;
 
     return message;
   } catch (error) {
