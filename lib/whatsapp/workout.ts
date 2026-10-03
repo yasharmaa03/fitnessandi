@@ -117,7 +117,7 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
         .insert({
           name: workout.exercise,
           muscle_group: 'full_body', // Default, can be improved
-          equipment: workout.type === 'cardio' ? 'none' : 'other',
+          equipment: workout.type === 'cardio' ? 'none' : 'barbell', // Use valid constraint values
         })
         .select('id')
         .single();
