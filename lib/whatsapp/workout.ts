@@ -67,14 +67,76 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
   const supabase = createServerClient();
 
   try {
+    // Step 1: Create or get today's workout_log session
+    let { data: existingLog } = await supabase
+      .from('workout_logs')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('date', today)
+      .maybeSingle();
+
+    let workoutLogId: string;
+
+    if (existingLog) {
+      workoutLogId = existingLog.id;
+    } else {
+      // Create new workout log for today
+      const { data: newLog, error: logError } = await supabase
+        .from('workout_logs')
+        .insert({
+          user_id: userId,
+          date: today,
+          status: 'in_progress',
+        })
+        .select('id')
+        .single();
+
+      if (logError || !newLog) {
+        throw new Error('Failed to create workout log');
+      }
+
+      workoutLogId = newLog.id;
+    }
+
+    // Step 2: Find or create exercise in exercises table
+    const { data: existingExercise } = await supabase
+      .from('exercises')
+      .select('id')
+      .ilike('name', workout.exercise)
+      .maybeSingle();
+
+    let exerciseId: string;
+
+    if (existingExercise) {
+      exerciseId = existingExercise.id;
+    } else {
+      // Create new exercise
+      const { data: newExercise, error: exerciseError } = await supabase
+        .from('exercises')
+        .insert({
+          name: workout.exercise,
+          muscle_group: 'full_body', // Default, can be improved
+          equipment: workout.type === 'cardio' ? 'none' : 'other',
+        })
+        .select('id')
+        .single();
+
+      if (exerciseError || !newExercise) {
+        throw new Error('Failed to create exercise');
+      }
+
+      exerciseId = newExercise.id;
+    }
+
+    // Step 3: Log the actual set/exercise
     if (workout.type === 'cardio') {
-      // Log cardio workout
-      await supabase.from('workout_logs').insert({
-        user_id: userId,
-        date: today,
-        exercise_name: workout.exercise,
+      await supabase.from('logged_sets').insert({
+        workout_log_id: workoutLogId,
+        exercise_id: exerciseId,
+        set_number: 1,
+        reps: 0,
+        weight_kg: 0,
         duration_minutes: workout.duration,
-        workout_type: 'cardio',
       });
 
       // Estimate calories burned (rough estimate: ~10 cal/min for moderate cardio)
@@ -86,16 +148,20 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
         `Great work! Keep it up! 💪`
       );
     } else {
-      // Log strength workout
-      await supabase.from('workout_logs').insert({
-        user_id: userId,
-        date: today,
-        exercise_name: workout.exercise,
-        sets_completed: workout.sets,
-        reps_completed: workout.reps,
-        weight_kg: workout.weight,
-        workout_type: 'strength',
-      });
+      // Log each set for strength training
+      const setPromises = [];
+      for (let i = 1; i <= (workout.sets ?? 1); i++) {
+        setPromises.push(
+          supabase.from('logged_sets').insert({
+            workout_log_id: workoutLogId,
+            exercise_id: exerciseId,
+            set_number: i,
+            reps: workout.reps ?? 0,
+            weight_kg: workout.weight ?? 0,
+          })
+        );
+      }
+      await Promise.all(setPromises);
 
       let message = `✅ Logged: ${workout.exercise} 💪\n`;
       message += `${workout.sets} sets × ${workout.reps} reps`;

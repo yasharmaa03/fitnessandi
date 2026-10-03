@@ -31,12 +31,26 @@ export async function handleSummaryMessage(userId: string): Promise<string> {
 
     const totalWater = (waterLogs ?? []).reduce((sum, w) => sum + (w.amount_ml ?? 0), 0);
 
-    // Get workout data
+    // Get workout data - query workout sessions for today
     const { data: workoutLogs } = await supabase
       .from('workout_logs')
-      .select('exercise_name, duration_minutes')
+      .select(`
+        id,
+        date,
+        logged_sets(exercise_id, set_number, duration_minutes)
+      `)
       .eq('user_id', userId)
       .eq('date', today);
+
+    // Count total exercises and duration
+    const workoutCount = workoutLogs?.length ?? 0;
+    const totalSets = workoutLogs?.reduce((sum, log: any) => {
+      return sum + (log.logged_sets?.length ?? 0);
+    }, 0) ?? 0;
+    
+    const totalDuration = workoutLogs?.reduce((sum, log: any) => {
+      return sum + (log.logged_sets?.reduce((s: number, set: any) => s + (set.duration_minutes ?? 0), 0) ?? 0);
+    }, 0) ?? 0;
 
     // Get user targets from nutrition profile
     const { data: profile } = await supabase
@@ -73,12 +87,11 @@ export async function handleSummaryMessage(userId: string): Promise<string> {
     message += totalWater >= targetWater ? ' ✅\n\n' : '\n\n';
 
     // Workout section
-    if (workoutLogs && workoutLogs.length > 0) {
+    if (workoutCount > 0) {
       message += `💪 *Workout:*\n`;
-      message += `• Completed: ${workoutLogs.length} exercise(s) ✅\n`;
-      const totalDuration = workoutLogs.reduce((sum, w) => sum + (w.duration_minutes ?? 0), 0);
+      message += `• Completed: ${totalSets} set(s) ✅\n`;
       if (totalDuration > 0) {
-        message += `• Duration: ${totalDuration} min\n`;
+        message += `• Duration: ${Math.round(totalDuration)} min\n`;
       }
       message += '\n';
     } else {
