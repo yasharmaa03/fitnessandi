@@ -141,8 +141,8 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
         workout_log_id: workoutLogId,
         exercise_id: exerciseId,
         set_number: 1,
-        reps: 0,
-        weight_kg: 0,
+        reps: null, // NULL for cardio (no reps concept)
+        weight_kg: null, // NULL for cardio (no weight)
         duration_minutes: workout.duration,
       });
 
