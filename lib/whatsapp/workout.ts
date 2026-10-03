@@ -109,6 +109,7 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
 
     if (existingExercise) {
       exerciseId = existingExercise.id;
+      console.log(`[WhatsApp Workout] Found existing exercise: ${exerciseId}`);
     } else {
       // Create new exercise
       const { data: newExercise, error: exerciseError } = await supabase
@@ -121,16 +122,22 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
         .select('id')
         .single();
 
-      if (exerciseError || !newExercise) {
-        throw new Error('Failed to create exercise');
+      if (exerciseError) {
+        console.error('[WhatsApp Workout] Failed to create exercise:', exerciseError);
+        throw new Error(`Failed to create exercise: ${exerciseError.message}`);
+      }
+      
+      if (!newExercise) {
+        throw new Error('Failed to create exercise: no data returned');
       }
 
       exerciseId = newExercise.id;
+      console.log(`[WhatsApp Workout] Created new exercise: ${exerciseId}`);
     }
 
     // Step 3: Log the actual set/exercise
     if (workout.type === 'cardio') {
-      await supabase.from('logged_sets').insert({
+      const { error: setError } = await supabase.from('logged_sets').insert({
         workout_log_id: workoutLogId,
         exercise_id: exerciseId,
         set_number: 1,
@@ -138,6 +145,12 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
         weight_kg: 0,
         duration_minutes: workout.duration,
       });
+
+      if (setError) {
+        console.error('[WhatsApp Workout] Failed to insert cardio set:', setError);
+        throw new Error(`Failed to log cardio set: ${setError.message}`);
+      }
+      console.log(`[WhatsApp Workout] Logged cardio set for workout_log: ${workoutLogId}, exercise: ${exerciseId}`);
 
       // Estimate calories burned (rough estimate: ~10 cal/min for moderate cardio)
       const caloriesBurned = Math.round((workout.duration ?? 0) * 10);
@@ -161,7 +174,15 @@ export async function handleWorkoutMessage(userId: string, text: string): Promis
           })
         );
       }
-      await Promise.all(setPromises);
+      const results = await Promise.all(setPromises);
+      
+      // Check for errors
+      const errors = results.filter(r => r.error);
+      if (errors.length > 0) {
+        console.error('[WhatsApp Workout] Failed to insert strength sets:', errors);
+        throw new Error(`Failed to log ${errors.length} set(s): ${errors[0].error?.message}`);
+      }
+      console.log(`[WhatsApp Workout] Logged ${workout.sets} strength sets for workout_log: ${workoutLogId}, exercise: ${exerciseId}`);
 
       let message = `✅ Logged: ${workout.exercise} 💪\n`;
       message += `${workout.sets} sets × ${workout.reps} reps`;
