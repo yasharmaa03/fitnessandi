@@ -121,7 +121,7 @@ function ExerciseCard({
       <div className="px-4 py-3">
         {/* Header row */}
         <div className="grid grid-cols-[24px_1fr_1fr_1fr] gap-2 mb-2">
-          {(entry.muscle_group === "full_body"
+          {(entry.sets.some(s => s.duration_minutes != null)
             ? ["#", "Weight", "Time", "RPE"]
             : ["#", "Weight", "Reps", "RPE"]
           ).map((h) => (
