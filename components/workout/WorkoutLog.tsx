@@ -136,10 +136,10 @@ function ExerciseCard({
             <div key={set.id} className="grid grid-cols-[24px_1fr_1fr_1fr] gap-2 items-center">
               <span className="font-metric text-[12px] text-[var(--color-text-3)] text-center">{set.set_number}</span>
               <span className="font-metric text-[13px] text-[var(--color-text-1)] text-center">
-                {entry.muscle_group === "full_body" ? "BW" : `${set.weight_kg}kg`}
+                {set.duration_minutes != null ? "BW" : `${set.weight_kg ?? 0}kg`}
               </span>
               <span className="font-metric text-[13px] text-[var(--color-text-1)] text-center">
-                {entry.muscle_group === "full_body" ? `${set.reps} min` : set.reps}
+                {set.duration_minutes != null ? `${set.duration_minutes} min` : (set.reps ?? 0)}
               </span>
               <span className="font-metric text-[13px] text-[var(--color-text-3)] text-center">{set.rpe ?? "—"}</span>
             </div>
@@ -149,7 +149,7 @@ function ExerciseCard({
         {/* Summary */}
         <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
           <span className="font-caption text-[11px] text-[var(--color-text-3)]">
-            {entry.muscle_group === "full_body"
+            {entry.sets.some(s => s.duration_minutes != null)
               ? `${entry.sets.length} session${entry.sets.length !== 1 ? "s" : ""}`
               : `${entry.sets.length} set${entry.sets.length !== 1 ? "s" : ""}`}
           </span>
